@@ -15,9 +15,10 @@ Displays a grid of images from [Flickr's recent photos](https://www.flickr.com/e
 
 ### Screenshots
 
-<img src="https://raw.githubusercontent.com/joydeepsaha05/software-engineer-mobile/master/Flickr-Task/screenshots/Screenshot_1524565699.png" width="350">
-<img src="https://raw.githubusercontent.com/joydeepsaha05/software-engineer-mobile/master/Flickr-Task/screenshots/Screenshot_1524565720.png" width="350">
-<img src="https://raw.githubusercontent.com/joydeepsaha05/software-engineer-mobile/master/Flickr-Task/screenshots/Screenshot_1524565753.png" width="350">
+<img src="https://raw.githubusercontent.com/joydeepsaha05/software-engineer-mobile/master/Flickr-Task/screenshots/Screenshot_1525085308.png" width="350">
+<img src="https://raw.githubusercontent.com/joydeepsaha05/software-engineer-mobile/master/Flickr-Task/screenshots/Screenshot_1525085341.png" width="350">
+<img src="https://raw.githubusercontent.com/joydeepsaha05/software-engineer-mobile/master/Flickr-Task/screenshots/Screenshot_1525085357.png" width="350">
+<img src="https://raw.githubusercontent.com/joydeepsaha05/software-engineer-mobile/master/Flickr-Task/screenshots/Screenshot_1525085418.png" width="350">
 
 ### Compatible with
 Android 4.0.3 (API Level 15) - Android 8.1 (API Level 27)
