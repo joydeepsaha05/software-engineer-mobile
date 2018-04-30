@@ -18,6 +18,6 @@
         android:layout_centerVertical="true"
         android:text="@string/no_photos"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="#FFFFFF" />
+        android:textColor="#000000" />
 
 </RelativeLayout>

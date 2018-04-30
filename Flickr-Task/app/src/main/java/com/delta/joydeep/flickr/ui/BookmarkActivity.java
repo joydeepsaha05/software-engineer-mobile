@@ -58,10 +58,11 @@ public class BookmarkActivity extends AppCompatActivity {
         }
         if (photoList.isEmpty()) {
             noPhotoTV.setVisibility(View.VISIBLE);
+            recyclerView.setVisibility(View.GONE);
         } else {
             noPhotoTV.setVisibility(View.GONE);
+            recyclerView.setVisibility(View.VISIBLE);
         }
-
         adapter.notifyDataSetChanged();
     }
 }
