@@ -1,10 +1,15 @@
 package com.delta.joydeep.flickr.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -13,6 +18,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.delta.joydeep.flickr.R;
 import com.delta.joydeep.flickr.adapter.PhotoAdapter;
+import com.delta.joydeep.flickr.adapter.SearchAdapter;
 import com.delta.joydeep.flickr.client.Flickr;
 import com.delta.joydeep.flickr.client.entities.Photo;
 import com.delta.joydeep.flickr.client.entities.PhotoModel;
@@ -35,7 +41,11 @@ public class MainActivity extends AppCompatActivity {
     private ProgressBar progressBar;
     private RelativeLayout tapToRetry;
     private PhotoAdapter adapter;
+    private SearchAdapter searchAdapter;
+    private SearchView searchView;
+    private RecyclerView searchRecyclerView;
     private List<Photo> photoList = new ArrayList<>();
+    private List<Photo> searchList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,14 +55,79 @@ public class MainActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.recyclerView);
         progressBar = findViewById(R.id.progress_bar);
         tapToRetry = findViewById(R.id.tap_to_retry);
+        searchRecyclerView = findViewById(R.id.search_recyclerView);
 
         initializeRecyclerView();
         configureRetry();
         loadData(true);
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_main, menu);
+        MenuItem myActionMenuItem = menu.findItem(R.id.action_search);
+        searchView = (SearchView) myActionMenuItem.getActionView();
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                Log.d(TAG, query);
+                searchList.clear();
+                query = query.toLowerCase();
+                for (Photo photo : photoList) {
+                    if (photo.title != null && photo.title.toLowerCase().contains(query)) {
+                        searchList.add(photo);
+                        Log.d(TAG, photo.title);
+                    }
+                }
+                searchRecyclerView.setVisibility(View.VISIBLE);
+                searchAdapter.notifyDataSetChanged();
+                recyclerView.setVisibility(View.GONE);
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
+
+        searchView.setOnCloseListener(new SearchView.OnCloseListener() {
+            @Override
+            public boolean onClose() {
+                searchList.clear();
+                searchRecyclerView.setVisibility(View.GONE);
+                recyclerView.setVisibility(View.VISIBLE);
+                adapter.notifyDataSetChanged();
+                return true;
+            }
+        });
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        switch (id) {
+            case R.id.action_bookmark:
+                startActivity(new Intent(this, BookmarkActivity.class));
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (searchView != null && !searchView.isIconified()) {
+            searchView.setQuery("", true);
+            searchView.onActionViewCollapsed();
+            searchView.setIconified(true);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
     private void initializeRecyclerView() {
-        recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
         adapter = new PhotoAdapter(photoList, Glide.with(this), recyclerView);
         recyclerView.setAdapter(adapter);
@@ -62,6 +137,10 @@ public class MainActivity extends AppCompatActivity {
                 loadData(false);
             }
         });
+
+        searchRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
+        searchAdapter = new SearchAdapter(searchList, Glide.with(this));
+        searchRecyclerView.setAdapter(searchAdapter);
     }
 
     private void configureRetry() {

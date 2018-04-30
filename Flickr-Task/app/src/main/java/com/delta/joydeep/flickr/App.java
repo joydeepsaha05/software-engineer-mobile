@@ -3,6 +3,10 @@ package com.delta.joydeep.flickr;
 import android.app.Application;
 import android.content.Context;
 
+import com.delta.joydeep.flickr.realm.RealmSingleton;
+
+import io.realm.Realm;
+
 public class App extends Application {
 
     public static boolean ENABLE_LOGGING;
@@ -23,5 +27,8 @@ public class App extends Application {
         ENABLE_LOGGING = BuildConfig.DEBUG;
 
         mInstance = this;
+
+        Realm.init(this);
+        RealmSingleton.getInstance();
     }
 }

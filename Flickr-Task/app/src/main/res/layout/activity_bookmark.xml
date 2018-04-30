@@ -10,28 +10,14 @@
         android:layout_height="match_parent"
         tools:context=".activity.TrendingActivity" />
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/search_recyclerView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone" />
-
-    <ProgressBar
-        android:id="@+id/progress_bar"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_centerInParent="true"
-        android:indeterminate="true"
-        android:progressDrawable="@drawable/circular_progress_bar"
-        android:visibility="gone" />
-
-    <include
-        android:id="@+id/tap_to_retry"
-        layout="@layout/error_layout"
+    <TextView
+        android:id="@+id/textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
-        android:layout_marginTop="?android:actionBarSize" />
+        android:text="@string/no_photos"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="#FFFFFF" />
 
 </RelativeLayout>

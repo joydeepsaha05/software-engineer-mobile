@@ -10,14 +10,12 @@ import android.graphics.PorterDuffColorFilter;
 import android.net.Uri;
 import android.support.customtabs.CustomTabsIntent;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -33,75 +31,32 @@ import com.delta.joydeep.flickr.realm.RealmPhoto;
 import com.delta.joydeep.flickr.realm.RealmSingleton;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import io.realm.Realm;
 
-public class PhotoAdapter extends RecyclerView.Adapter {
+/**
+ * Created by joydeep.
+ */
+public class SearchAdapter extends RecyclerView.Adapter {
 
     private final int VIEW_ITEM = 1;
     private List<Photo> items;
     private RequestManager requestManager;
-    private OnLoadMoreListener onLoadMoreListener;
-    // The minimum amount of items to have below your current scroll position before loading more.
-    private int visibleThreshold = 2;
-    private int lastVisibleItem, totalItemCount;
-    private int serverPageCount, currentPage;
-    private boolean loading;
-    private long lastLoadTime;
     private Realm realm;
 
-    public PhotoAdapter(List<Photo> items, RequestManager requestManager, RecyclerView recyclerView) {
+    public SearchAdapter(List<Photo> items, RequestManager requestManager) {
         this.items = items;
         this.requestManager = requestManager;
 
         realm = RealmSingleton.getInstance().getRealm();
-
-        serverPageCount = 1;
-        currentPage = 0;
-        lastLoadTime = 0;
-
-        if (recyclerView.getLayoutManager() instanceof LinearLayoutManager) {
-
-            final LinearLayoutManager linearLayoutManager = (LinearLayoutManager) recyclerView
-                    .getLayoutManager();
-
-            recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-                @Override
-                public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                    super.onScrolled(recyclerView, dx, dy);
-
-                    totalItemCount = linearLayoutManager.getItemCount();
-                    lastVisibleItem = linearLayoutManager.findLastVisibleItemPosition();
-                    if (!loading && totalItemCount <= (lastVisibleItem + visibleThreshold)
-                            && currentPage < serverPageCount) {
-                        // Reached the end
-                        if (TimeUnit.SECONDS.convert(System.currentTimeMillis() - lastLoadTime,
-                                TimeUnit.MILLISECONDS) < 7) {
-                            return;
-                        }
-                        if (onLoadMoreListener != null) {
-                            onLoadMoreListener.onLoadMore();
-                        }
-                        loading = true;
-                    }
-                }
-            });
-        }
     }
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         RecyclerView.ViewHolder vh;
-        if (viewType == VIEW_ITEM) {
-            View v = LayoutInflater.from(parent.getContext()).inflate(
-                    R.layout.item_main, parent, false);
-            vh = new PhotoViewHolder(v);
-        } else {
-            View v = LayoutInflater.from(parent.getContext()).inflate(
-                    R.layout.layout_progress_bar, parent, false);
-            vh = new ProgressViewHolder(v);
-        }
+        View v = LayoutInflater.from(parent.getContext()).inflate(
+                R.layout.item_main, parent, false);
+        vh = new PhotoViewHolder(v);
         return vh;
     }
 
@@ -116,7 +71,7 @@ public class PhotoAdapter extends RecyclerView.Adapter {
             photoViewHolder.isBackVisible = false;
 
             RealmPhoto realmPhoto = realm.where(RealmPhoto.class)
-                    .equalTo("id", PhotoAdapter.this.items.get(photoViewHolder.getAdapterPosition()).id)
+                    .equalTo("id", SearchAdapter.this.items.get(photoViewHolder.getAdapterPosition()).id)
                     .findFirst();
             if (realmPhoto == null) {
                 setBookmarkedImage(photoViewHolder.bookmark, false);
@@ -163,12 +118,11 @@ public class PhotoAdapter extends RecyclerView.Adapter {
                     .into(photoViewHolder.imgViewIcon);
             photoViewHolder.tvTitle.setText(photo.title);
 
-
             photoViewHolder.tvOwner.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Uri uri = Uri.parse("https://www.flickr.com/people/"
-                            + PhotoAdapter.this.items.get(photoViewHolder.getAdapterPosition()).owner
+                            + SearchAdapter.this.items.get(photoViewHolder.getAdapterPosition()).owner
                             + "/");
                     CustomTabsIntent.Builder intentBuilder = new CustomTabsIntent.Builder();
                     intentBuilder.setToolbarColor(ContextCompat.getColor(App.getAppContext(),
@@ -191,11 +145,11 @@ public class PhotoAdapter extends RecyclerView.Adapter {
                         @Override
                         public void execute(Realm realm) {
                             RealmPhoto realmPhoto = realm.where(RealmPhoto.class)
-                                    .equalTo("id", PhotoAdapter.this.items.get(photoViewHolder.getAdapterPosition()).id)
+                                    .equalTo("id", SearchAdapter.this.items.get(photoViewHolder.getAdapterPosition()).id)
                                     .findFirst();
                             if (realmPhoto == null) {
                                 realmPhoto = realm.createObject(RealmPhoto.class);
-                                realmPhoto.setDetails(PhotoAdapter.this.items.get(photoViewHolder.getAdapterPosition()));
+                                realmPhoto.setDetails(SearchAdapter.this.items.get(photoViewHolder.getAdapterPosition()));
                                 setBookmarkedImage(photoViewHolder.bookmark, true);
                             } else {
                                 realmPhoto.deleteFromRealm();
@@ -205,22 +159,6 @@ public class PhotoAdapter extends RecyclerView.Adapter {
                     });
                 }
             });
-        } else {
-            ((ProgressViewHolder) holder).progressBar.setIndeterminate(true);
-        }
-    }
-
-    private void setBookmarkedImage(ImageView watchedImage, boolean watched) {
-        if (watched) {
-            PorterDuffColorFilter porterDuffColorFilter =
-                    new PorterDuffColorFilter(ContextCompat.getColor(App.getAppContext(),
-                            R.color.ColorWatchedGreen), PorterDuff.Mode.SRC_ATOP);
-            watchedImage.setColorFilter(porterDuffColorFilter);
-        } else {
-            PorterDuffColorFilter porterDuffColorFilter =
-                    new PorterDuffColorFilter(ContextCompat.getColor(App.getAppContext(),
-                            R.color.ColorWatchedRed), PorterDuff.Mode.SRC_ATOP);
-            watchedImage.setColorFilter(porterDuffColorFilter);
         }
     }
 
@@ -235,31 +173,18 @@ public class PhotoAdapter extends RecyclerView.Adapter {
         return items.size();
     }
 
-    public void setLoaded(boolean isSuccessful) {
-        loading = false;
-        if (!isSuccessful) {
-            lastLoadTime = System.currentTimeMillis();
+    private void setBookmarkedImage(ImageView watchedImage, boolean watched) {
+        if (watched) {
+            PorterDuffColorFilter porterDuffColorFilter =
+                    new PorterDuffColorFilter(ContextCompat.getColor(App.getAppContext(),
+                            R.color.ColorWatchedGreen), PorterDuff.Mode.SRC_ATOP);
+            watchedImage.setColorFilter(porterDuffColorFilter);
+        } else {
+            PorterDuffColorFilter porterDuffColorFilter =
+                    new PorterDuffColorFilter(ContextCompat.getColor(App.getAppContext(),
+                            R.color.ColorWatchedRed), PorterDuff.Mode.SRC_ATOP);
+            watchedImage.setColorFilter(porterDuffColorFilter);
         }
-    }
-
-    public void setServerPageCount(int pageCount) {
-        serverPageCount = pageCount;
-    }
-
-    public int getCurrentPage() {
-        return currentPage;
-    }
-
-    public void setCurrentPage(int page) {
-        currentPage = page;
-    }
-
-    public void setOnLoadMoreListener(OnLoadMoreListener onLoadMoreListener) {
-        this.onLoadMoreListener = onLoadMoreListener;
-    }
-
-    public interface OnLoadMoreListener {
-        void onLoadMore();
     }
 
     static class PhotoViewHolder extends RecyclerView.ViewHolder {
@@ -336,15 +261,6 @@ public class PhotoAdapter extends RecyclerView.Adapter {
                     }
                 }
             });
-        }
-    }
-
-    private static class ProgressViewHolder extends RecyclerView.ViewHolder {
-        ProgressBar progressBar;
-
-        ProgressViewHolder(View v) {
-            super(v);
-            progressBar = v.findViewById(R.id.progress_bar);
         }
     }
 }

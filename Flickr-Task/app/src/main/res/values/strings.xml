@@ -3,4 +3,6 @@
     <string name="connection_error">Unable to fetch data. Tap to retry.</string>
     <string name="error_fetching_data">Error fetching data</string>
     <string name="owner"><u>Owner</u></string>
+    <string name="search_title">Search</string>
+    <string name="no_photos">No photos bookmarked</string>
 </resources>
